@@ -1,0 +1,10 @@
+*.beam
+.eunit
+deps/
+ebin/
+rel/alum
+dev
+erl_crash.dump
+*~
+.#*
+*#

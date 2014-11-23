@@ -1,0 +1,13 @@
+{application, alum, [
+    {description, "Distributed static content application."},
+    {vsn, "1.0.0"},
+    {modules, []},
+    {registered, [alum_sup]},
+    {applications, [
+        kernel,
+        stdlib,
+        cowboy
+    ]},
+    {mod, {alum_app, []}},
+    {env, []}
+]}.

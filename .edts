@@ -1,0 +1,2 @@
+:lib-dirs '("apps" "deps")
+:otp-path "/opt/erlang/R16B03"

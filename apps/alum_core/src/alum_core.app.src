@@ -1,0 +1,13 @@
+%% -*- erlang -*-
+{application, alum_core, [
+    {description, "Alum riak core app."},
+    {vsn, "1.0.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib,
+        riak_core
+    ]},
+    {mod, { alum_core_app, []}},
+    {env, []}
+ ]}.
