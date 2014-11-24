@@ -14,25 +14,25 @@
 
 %% @doc Store a file
 %% alum_core:store({ <<"static.alum.com">>, <<"/file.json">> , <<"[1,2,3]">> }).
-store(File) ->
-    Response = alum_core_fsm:do(?PROCESS_VMASTER, {store, File}, ?N, ?W),
+store({Host, Path, Content}) ->
+    Response = alum_core_fsm:do(?PROCESS_VMASTER, {store, {Host, Path, Content}}, ?N, ?W),
     Status   = lists:all(fun(X) when X =:= ok -> true; (_) -> false end, Response),
 
     Status.
 
 %% @doc Fetch a file
 %% alum_core:fetch({ <<"static.alum.com">>, <<"/file.json">> }).
-fetch(FilePath) ->
-    Response  = alum_core_fsm:do(?PROCESS_VMASTER, {fetch, FilePath}, ?N, ?R),
+fetch({Host, Path}) ->
+    Response  = alum_core_fsm:do(?PROCESS_VMASTER, {fetch, {Host, Path} }, ?N, ?R),
     Element   = lists:last(Response),
     Element.
 
 
 %% @doc Lists all the existing files
 %% alum_core:list({ <<"static.alum.com">>, <<"/">> }).
-list(FilePath) ->
+list({Host, Path}) ->
     % Start coverate FSM to send out the command
-    {ok, ReqId} = alum_core_coverage_fsm:start_op(list, FilePath),
+    {ok, ReqId} = alum_core_coverage_fsm:start_op(list, {Host, Path}),
 
     % Wait default interval for the request to complete
     case wait_for_req(ReqId) of

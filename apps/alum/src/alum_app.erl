@@ -13,7 +13,7 @@ start(_Type, _Args) ->
             {"/[...]", alum_handler, []}
         ]}
     ]),
-    {ok, _} = cowboy:start_http(http, 500, WebConfig, [
+    {ok, _} = cowboy:start_http(alum_web, 500, WebConfig, [
         {env, [{dispatch, Dispatch}]}
     ]),
     alum_sup:start_link().

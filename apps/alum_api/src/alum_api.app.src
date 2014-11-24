@@ -1,0 +1,13 @@
+{application, alum_api, [
+    {description, "Alum Rest API."},
+    {vsn, "1.0.0"},
+    {modules, []},
+    {registered, [alum_api_sup]},
+    {applications, [
+        kernel,
+        stdlib,
+        cowboy
+    ]},
+    {mod, {alum_api_app, []}},
+    {env, []}
+]}.
