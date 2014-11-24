@@ -24,7 +24,7 @@ terminate(_Reason, _Req, _State) ->
 
 execute(<<"GET">>, FilePath, Req) ->
     % get file content
-    FileGet  = alum:get(FilePath),
+    FileGet  = alum_core:fetch(FilePath),
     Response = create_get_reply(FileGet, Req),
 
     Response;
@@ -33,7 +33,7 @@ execute(<<"PUT">>, {Host, Path}, Req) ->
     {ok, Body, _} = cowboy_req:body(Req),
     % put file content
     File = {Host, Path, Body},
-    true = alum:put(File),
+    true = alum_core:store(File),
     % generete response
     Headers  = [{<<"content-type">>, <<"application/json">>}],
     Response = cowboy_req:reply(200, Headers, <<"true">>, Req),
