@@ -28,24 +28,23 @@ handle_content(Req, State) ->
     {Method, _} = cowboy_req:method(Req),
     {Host, _}   = cowboy_req:binding(host, Req),
     {Path, _}   = cowboy_req:binding(path, Req),
+    FilePath    = {Host, filename:join(["/", Path])},
 
-    handle_content(Method, Host, Path, Req, State).
+    handle_content(Method, FilePath, Req, State).
 
-handle_content(<<"GET">>, Host, Path, Req, State) ->
-    Response = jiffy:encode({[
-        {status, ok},
-        {host, Host},
-        {path, Path}
-    ]}),
+handle_content(<<"GET">>, {Host, Path}, Req, State) ->
+    case alum_core:fetch({Host, Path}) of
+        {ok, {Body, _}} -> {Body, Req, State};
+        {not_found}     -> {true, Req, State}
+    end;
 
-    {Response, Req, State};
+handle_content(<<"PUT">>, {Host, Path}, Req, State) ->
+    {ok, Body, _} = cowboy_req:body(Req),
+    Result        = alum_core:store({Host, Path, Body}),
 
-handle_content(<<"PUT">>, Host, Path, Req, State) ->
-    % {ok, Content, _} = cowboy_req:body(Req),
-    % Response = jiffy:encode({[
-    %    {host, Host},
-    %    {path, Path},
-    %    {status, ok}
-    %]}),
-
-    {true, Req, State}.
+    case Result of
+        {ok, {Body, _}} ->
+            {true, Req, State};
+        _ ->
+            {false, Req, State}
+    end.
