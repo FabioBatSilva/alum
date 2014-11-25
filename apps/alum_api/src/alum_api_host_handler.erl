@@ -31,19 +31,32 @@ handle_json(Req, State) ->
     handle_json(Method, Host, Req, State).
 
 handle_json(<<"GET">>, Host, Req, State) ->
-    Config = get_host_config(Host),
-    Body   = jiffy:encode({Config}),
-
-    {Body, Req, State};
+    case get_host_config(Host) of
+        {error, _} ->
+            {<<"error">>, Req, State};
+        not_found ->
+	    {<<"not_found">>, Req, State};
+ 	Props ->
+            {jiffy:encode({Props}), Req, State}
+    end;
 
 handle_json(<<"PUT">>, Host, Req, State) ->
-    Config = get_host_config(Host),
-    Body   = jiffy:encode({Config}),
+    {ok, Body, _} = cowboy_req:body(Req),
+    JsonResult    = jiffy:decode(Body),
+    Config        = case JsonResult of
+        {error, _} -> [];
+        {List}     -> List
+    end,
 
-    {Body, Req, State}.
+    case set_host_config(Host, Config) of
+        ok    -> {true, Req, State};
+        Error ->
+            lager:warning("Error: ~p", [Error]), 
+            {false, Req, State}
+    end.
 
 get_host_config(Host) ->
-    [
-        {host, Host},
-        {cache, 3600}
-    ].
+    alum_core_host:get_host(Host).
+
+set_host_config(Host, Config) ->
+    alum_core_host:set_host(Host, Config).
