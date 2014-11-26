@@ -29,11 +29,11 @@ merge_defaults(Overriding) ->
 get_host(Host) ->
     case get_metadata(Host) of
         {error, _} = Error -> 
-            Error;
+            {error, Error};
         undefined ->
-            not_found;
+            {error, not_found};
         Props -> 
-            [{name, Host} | Props]
+            {ok, [{name, Host} | Props]}
     end.
 
 set_host(Host, Value) ->

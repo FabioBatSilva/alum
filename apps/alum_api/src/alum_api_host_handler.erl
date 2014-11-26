@@ -2,57 +2,90 @@
 
 -export([
     init/3,
-    handle_json/2,
+    rest_init/2,
     allowed_methods/2,
+    resource_exists/2,
+    handle_get_config/2,
+    handle_put_config/2,
     content_types_accepted/2,
     content_types_provided/2
 ]).
 
+-record(context, {
+    host,
+    method,
+    config
+}).
+
 init(_Transport, _Req, []) ->
     {upgrade, protocol, cowboy_rest}.
 
+rest_init(Req, _Opts) ->
+    {Method, RespMethod} = cowboy_req:method(Req),
+    {Host, RespHost}     = cowboy_req:binding(host, RespMethod),
+
+    {ok, RespHost, #context{host=Host, method=Method}}.
+
+resource_exists(Req, #context{host=Host, method=Method}=State) when Method =:= <<"GET">> ->
+    case get_host_config(Host) of
+        {ok, Config} ->
+            {true, Req, State#context{host=Host, config=Config}};
+        _ ->
+            response(false, [{status, not_found}], Req, State#context{host=Host})
+    end;
+
+resource_exists(Req, State) ->
+    {true, Req, State}.
+
 content_types_provided(Req, State) ->
     {[
-        {<<"application/json">>, handle_json}
+        {<<"application/json">>, handle_get_config}
     ], Req, State}.
 
 content_types_accepted(Req, State) ->
     {[
-        {{<<"application">>, <<"json">>, []}, handle_json}
+        {{<<"application">>, <<"json">>, '*'}, handle_put_config}
     ], Req, State}.
 
 allowed_methods(Req, State) ->
     {[<<"GET">>, <<"PUT">>], Req, State}.
 
-handle_json(Req, State) ->
-    {Method, _} = cowboy_req:method(Req),
-    {Host, _}   = cowboy_req:binding(host, Req),
+handle_get_config(Req,#context{config=Config}=State) ->
+    response(Config, Req, State).
 
-    handle_json(Method, Host, Req, State).
-
-handle_json(<<"GET">>, Host, Req, State) ->
-    case get_host_config(Host) of
-        {error, _} ->
-            {<<"error">>, Req, State};
-        not_found ->
-	    {<<"not_found">>, Req, State};
- 	Props ->
-            {jiffy:encode({Props}), Req, State}
-    end;
-
-handle_json(<<"PUT">>, Host, Req, State) ->
+handle_put_config(Req, #context{host=Host}=State) ->
     {ok, Body, _} = cowboy_req:body(Req),
-    JsonResult    = jiffy:decode(Body),
-    Config        = case JsonResult of
-        {error, _} -> [];
-        {List}     -> List
-    end,
+    Config        = decode_request(Body),
 
     case set_host_config(Host, Config) of
-        ok    -> {true, Req, State};
-        Error ->
-            lager:warning("Error: ~p", [Error]), 
-            {false, Req, State}
+        ok ->
+            response(true, [{status, ok}], Req, State);
+        {error, Error} ->
+            response(halt, [{status, error}], Req, State)
+    end.
+
+response(Status, Body, Req, State) ->
+    Json  = encode_response(Body),
+    Resp  = cowboy_req:set_resp_body(Json, Req),
+
+    {Status, Resp, State}.
+
+response(Body, Req, State) ->
+    {encode_response(Body), Req, State}.
+
+decode_request(Body) ->
+    case jiffy:decode(Body) of
+        {error, _} -> [];
+        {List}     -> List
+    end.
+
+encode_response(Body) ->
+    case jiffy:encode({Body}) of
+        {error, Details} ->
+            lager:error("Error : ~p~n", [Details]),
+            {error, Details};
+        Binary ->
+            Binary
     end.
 
 get_host_config(Host) ->
