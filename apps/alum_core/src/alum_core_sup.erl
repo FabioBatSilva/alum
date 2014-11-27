@@ -42,10 +42,13 @@ init([]) ->
         {riak_core_vnode_master, start_link, [alum_core_vnode]},
         permanent, 5000, worker, [riak_core_vnode_master]
     },
+
     {ok, {{one_for_one, 5, 10}, [Coord, Coverage, Master]}};
 
 init([alum_core_fsm_sup]) ->
-    Mod = alum_core_fsm,
-    {ok, {{simple_one_for_one, 0, 1}, [{Mod, {Mod, start_link, []},
-                                        temporary, 5000, worker, [Mod]}
-                                      ]}}.
+    Fsm = {alum_core_fsm,
+        {alum_core_fsm, start_link, []},
+        temporary, 5000, worker, [alum_core_fsm]
+    },
+
+    {ok, {{simple_one_for_one, 0, 1}, [Fsm]}}.
