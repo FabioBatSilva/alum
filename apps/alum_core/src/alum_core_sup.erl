@@ -7,7 +7,7 @@
 -export([
     start_link/0,
     start_link/1,
-    start_coordinator/1
+    start_fsm/1
 ]).
 
 %% Supervisor callbacks
@@ -23,7 +23,7 @@ start_link() ->
 start_link(Sup) ->
     supervisor:start_link({local, Sup}, ?MODULE, [Sup]).
 
-start_coordinator(VnodeMaster) ->
+start_fsm(VnodeMaster) ->
     supervisor:start_child(alum_core_fsm_sup, [VnodeMaster]).
 
 %% ===================================================================

@@ -42,7 +42,7 @@ start_link(VnodeMaster) ->
     gen_fsm:start_link(?MODULE, [VnodeMaster], []).
 
 do(VnodeMaster, Cmd, N, WR) ->
-    {ok, Pid} = alum_core_sup:start_coordinator(VnodeMaster),
+    {ok, Pid} = alum_core_sup:start_fsm(VnodeMaster),
     gen_fsm:sync_send_event(Pid, {Cmd, N, WR}).
 
 %%%===================================================================
