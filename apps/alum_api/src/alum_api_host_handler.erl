@@ -60,7 +60,8 @@ handle_put_config(Req, #context{host=Host}=State) ->
     case set_host_config(Host, Config) of
         ok ->
             response(true, [{status, ok}], Req, State);
-        {error, Error} ->
+        {error, Details} ->
+            lager:error("Error : ~p~n", [Details]),
             response(halt, [{status, error}], Req, State)
     end.
 
