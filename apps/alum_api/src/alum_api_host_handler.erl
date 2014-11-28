@@ -29,9 +29,9 @@ rest_init(Req, _Opts) ->
 resource_exists(Req, #context{host=Host, method=Method}=State) when Method =:= <<"GET">> ->
     case get_host_config(Host) of
         {ok, Config} ->
-            {true, Req, State#context{host=Host, config=Config}};
+            {true, Req, State#context{config=Config}};
         _ ->
-            response(false, [{status, not_found}], Req, State#context{host=Host})
+            response(false, [{status, not_found}], Req, State)
     end;
 
 resource_exists(Req, State) ->
