@@ -44,7 +44,7 @@ content_types_provided(Req, State) ->
 
 content_types_accepted(Req, State) ->
     {[
-        {{<<"application">>, <<"json">>, '*'}, handle_put_config}
+        { '*' , handle_put_config}
     ], Req, State}.
 
 allowed_methods(Req, State) ->

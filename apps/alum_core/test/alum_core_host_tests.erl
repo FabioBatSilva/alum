@@ -19,7 +19,7 @@ set_host_merge_test() ->
         ok
     end),
 
-    Actual = alum_core_host:set_host(Host, [{cache, 999}]),
+    Actual = alum_core_host:set_host(Host, [{"cache", 999}]),
 
     meck:validate(riak_core_metadata),
     meck:unload(riak_core_metadata),

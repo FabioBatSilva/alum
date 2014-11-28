@@ -27,7 +27,19 @@ merge(Overriding, Other) ->
     ).
 
 merge_defaults(Overriding) ->
-    merge(Overriding, defaults()).
+    merge(parse_values(Overriding), defaults()).
+
+parse_values(Config) when erlang:is_list(Config) ->
+    lists:map(fun parse_values/1, Config);
+
+parse_values({Key, Value}) when erlang:is_binary(Key) ->
+    {erlang:binary_to_atom(Key), Value};
+
+parse_values({Key, Value}) when erlang:is_list(Key) ->
+    {erlang:list_to_atom(Key), Value};
+
+parse_values({Key, Value}) ->
+    {Key, Value}.
 
 get_host(Host) ->
     case get_metadata(Host) of
