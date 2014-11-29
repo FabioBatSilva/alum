@@ -27,7 +27,7 @@ curl -XPUT "http://localhost:9090/hosts/static.alum.com" -d '{ "cache" : 3600 }'
 ###  http://localhost:9090/content/{host}/{filepath} #
 
 ```shell
-curl -XPUT "http://localhost:9090/static.alum.com/images/avatar.jpg" -d @path-to-avatar.jpg
+curl -XPUT "http://localhost:9090/static.alum.com/images/avatar.jpg" --data-binary @path-to-avatar.jpg
 ```
 
 ###  Serving static files #
