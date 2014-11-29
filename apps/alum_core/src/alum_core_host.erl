@@ -7,16 +7,12 @@
     get_host/1,
     cache/1,
     n_val/1,
-    r_val/1,
-    w_val/1,
     name/1
 ]).
 
 defaults() ->
     [
         {cache, 3600},
-        {r, quorum},
-        {w, quorum},
         {n_val, 3}
     ].
 
@@ -47,7 +43,7 @@ get_host(Host) ->
             {error, Details};
         undefined ->
             {error, not_found};
-        Props -> 
+        Props ->
             {ok, [{name, Host} | Props]}
     end.
 
@@ -62,12 +58,6 @@ cache(Props) ->
 
 n_val(Props) ->
     get_prop_value(n_val, Props).
-
-r_val(Props) ->
-    get_prop_value(r, Props).
-
-w_val(Props) ->
-    get_prop_value(w, Props).
 
 set_metadata(Host, HostMeta) ->
     riak_core_metadata:put(?METADATA_PREFIX, host_key(Host), HostMeta).

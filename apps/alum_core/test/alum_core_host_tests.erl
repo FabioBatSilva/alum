@@ -8,7 +8,7 @@
 -define(METADATA_PREFIX, {alum_core, hosts}).
 
 set_host_merge_test() ->
-    Merge = [{cache,999}, {n_val,3}, {r,quorum}, {w,quorum}],
+    Merge = [{cache,999}, {n_val,3}],
     ok    = meck:new(riak_core_metadata),
     Host  = <<"static.com">>,
 
@@ -27,7 +27,7 @@ set_host_merge_test() ->
     ?assertEqual(ok, Actual).
 
 get_host_test() ->
-    Props    = [{cache,3600}, {n_val,3}, {r,quorum}, {w,quorum}],
+    Props    = [{cache,3600}, {n_val,3}],
     ok       = meck:new(riak_core_metadata),
     Host     = <<"static.somehostname.com">>,
     Expected = {ok, [{name, Host} | Props]},
@@ -84,15 +84,11 @@ get_host_error_test() ->
 get_host_props_test() ->
     HostName = <<"static.alum.com">>,
     Props    = [
-        {name, HostName}, 
+        {name, HostName},
         {cache, 3600},
-        {n_val, 3},  
-        {w, 2}, 
-        {r, 1}
+        {n_val, 3}
     ],
 
     ?assertEqual(HostName, alum_core_host:name(Props)),
     ?assertEqual(3600, alum_core_host:cache(Props)),
-    ?assertEqual(3, alum_core_host:n_val(Props)),
-    ?assertEqual(2, alum_core_host:w_val(Props)),
-    ?assertEqual(1, alum_core_host:r_val(Props)).
+    ?assertEqual(3, alum_core_host:n_val(Props)).
