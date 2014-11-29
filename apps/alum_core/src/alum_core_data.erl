@@ -16,8 +16,9 @@ fetch(FilePath) ->
     FileRead = file:read_file(RealPath),
 
     case FileRead of
-        {error, _} -> {not_found};
-        {ok, Body} -> {ok, {Body, file_type(RealPath)}}
+        {ok, Body}      -> {ok, {Body, file_type(RealPath)}};
+        {error, enoent} -> {not_found, enoent};
+        Error           -> Error
     end.
 
 store({Host, Path, Content}) ->
@@ -32,8 +33,9 @@ list({Host, Path}) ->
     RealPath = file_path(FilePath),
 
     case file:list_dir(RealPath) of
-        {ok, List} -> List;
-        {error, _} -> []
+        {ok, List}      -> {ok, List};
+        {error, enoent} -> {not_found, enoent};
+        Error           -> Error
     end.
 
 file_path({Host, Path}) ->

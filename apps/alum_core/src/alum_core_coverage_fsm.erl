@@ -29,7 +29,7 @@
         % Preflsit
         preflist,
         % Responses
-        resp=[]
+        resp=sets:new()
         }).
 
 % This is the maximum time we wait
@@ -62,16 +62,21 @@ init(_, [ReqId, From, Op, Args]) ->
 
     {Req, all, ?N, ?R, alum_core, ?PROCESS_VMASTER, ?WAIT_TIMEOUT, State}.
 
-process_results(Resp, State=#state{resp=Buf}) ->
-    NewBuf = case lists:member(Resp, Buf) of
-        true  -> Buf;
-        false -> [Resp | Buf]
-    end,
+process_results({ok, List}, State=#state{resp=BufSet}) ->
+    NewSet  = sets:from_list(List),
+    RespSet = sets:union(NewSet, BufSet),
 
-    {done, State#state{resp=NewBuf}}.
+    {done, State#state{resp=RespSet}};
+
+process_results({not_found, _}, State) ->
+    {done, State};
+
+process_results({error, Details}, State) ->
+    lager:error("Error : ~p~n", [Details]),
+    {done, State}.
 
 finish(clean, S=#state{req_id=ReqId, from=From, resp=Buf}) ->
-    From ! {ReqId, {ok, Buf}},
+    From ! {ReqId, {ok, sets:to_list(Buf)}},
     {stop, normal, S};
 
 finish({error, timeout}, S=#state{req_id=ReqId, from=From}) ->
@@ -83,4 +88,3 @@ finish(Reason, S=#state{req_id=ReqId, from=From}) ->
     lager:warning("Coverage query failed! Reason: ~p", [Reason]),
     From ! {ReqId, {error, Reason}},
     {stop, normal, S}.
-

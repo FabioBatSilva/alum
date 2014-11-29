@@ -13,10 +13,10 @@ list_test() ->
     BasePath    = <<"/tmp">>,
     RealPath    = <<"/tmp/static.com/files">>,
     FilePath    = {<<"static.com">>, <<"/files">>},
-    Expected    = [<<"image.png">>, <<"doc.txt">>],
+    FileList    = [<<"image.png">>, <<"doc.txt">>],
 
     meck:expect(alum_core_config, get_content_path, [], BasePath),
-    meck:expect(file, list_dir, [RealPath], {ok, Expected}),
+    meck:expect(file, list_dir, [RealPath], {ok, FileList}),
 
     Actual = alum_core_data:list(FilePath),
 
@@ -25,7 +25,7 @@ list_test() ->
     meck:validate(file),
     meck:unload(file),
 
-    ?assertEqual(Expected, Actual).
+    ?assertEqual({ok, FileList}, Actual).
 
 fetch_test() ->
 
@@ -64,7 +64,7 @@ fetch_error_test() ->
     BasePath    = <<"/tmp">>,
     RealPath    = <<"/tmp/static.com/enoent-file.png">>,
     FilePath    = {<<"static.com">>, <<"/enoent-file.png">>},
-    Expected    = {not_found},
+    Expected    = {not_found, enoent},
 
     meck:expect(alum_core_config, get_content_path, [], BasePath),
     meck:expect(file, read_file, [RealPath], {error, enoent}),
