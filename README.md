@@ -1,3 +1,5 @@
+# THIS IS A WORK IN PROGRESS !!
+
 Distributed static content app.
 ======================================
 
